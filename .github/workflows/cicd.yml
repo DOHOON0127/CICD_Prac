@@ -73,7 +73,15 @@ jobs:
               -v ~/application.yml:/app/application.yml \
               ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
 
-              
+            # 헬스체크 대기 및 실행
+            echo "Waiting for app to start..."
+            sleep 10
+            echo "Performing health check..."
+            curl --fail http://localhost:8080/actuator/health \
+              && echo "Health check passed!" \
+              || (echo "Health check failed!" && docker logs spring-miruni-backend && exit 1)
+
+
 
 
 
