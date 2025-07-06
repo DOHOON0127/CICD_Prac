@@ -38,12 +38,12 @@ jobs:
       # Docker 이미지 빌드
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-backend:latest .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest .
 
       # DockerHub에 이미지 푸시
       - name: Push Docker image to DockerHub
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/spring-backend:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
 
       # EC2에 SSH 접속하여 컨테이너 재배포
       - name: Deploy to EC2
@@ -54,24 +54,31 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
 
-            # 기존에 실행 중인 spring-backend 컨테이너가 있으면 종료 및 삭제
-            docker rm -f spring-backend || true
+            # 기존에 실행 중인 spring-miruni-backend 컨테이너가 있으면 종료 및 삭제
+            docker rm -f spring-miruni-backend || true
 
             # 최신 이미지 다운로드
-            docker pull ${{ secrets.DOCKER_USERNAME }}/spring-backend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
 
             # GitHub Secret에 저장된 application.yml 내용을 EC2에 파일로 생성
             echo "${{ secrets.APPLICATION_YML }}" > ~/application.yml
 
             # 새 컨테이너 실행
-              # 이름: spring-backend
+              # 이름: spring-miruni-backend
               # EC2의 8080 포트를 컨테이너에 연결
               # application.yml을 컨테이너 안으로 마운트
             docker run -d \
-              --name spring-backend \
+              --name spring-miruni-backend \
               -p 8080:8080 \
               -v ~/application.yml:/app/application.yml \
-              ${{ secrets.DOCKER_USERNAME }}/spring-backend:latest
+              ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
+
+            # 헬스 체크 추가 
+            echo "Waiting for application to start..."
+            sleep 10  # Spring Boot 부팅 대기
+            echo "Performing health check..."
+            curl --fail http://localhost:8080/actuator/health || (echo "Health check failed" && exit 1)
+            echo "Health check passed!"
 
 
-              
+
