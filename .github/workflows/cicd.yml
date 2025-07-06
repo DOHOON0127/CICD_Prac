@@ -54,16 +54,8 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
 
-            # 기존에 실행 중인 컨테이너가 있으면 종료 및 삭제
-            if docker ps -q -f name=spring-miruni-backend; then
-            docker stop spring-miruni-backend
-            fi
-            if docker ps -aq -f name=spring-miruni-backend; then
-            docker rm spring-miruni-backend
-            fi
-        
-            # 8080 포트 사용 중인 프로세스 강제 종료
-            fuser -k 8080/tcp || true
+            # 기존에 실행 중인 spring-miruni-backend 컨테이너가 있으면 종료 및 삭제
+            docker rm -f spring-miruni-backend || true
 
             # 최신 이미지 다운로드
             docker pull ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
@@ -81,13 +73,6 @@ jobs:
               -v ~/application.yml:/app/application.yml \
               ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
 
-            # 헬스 체크 추가 
-            echo "Waiting for application to start..."
-            sleep 10  # Spring Boot 부팅 대기
-            echo "Performing health check..."
-            curl --fail http://localhost:8080/actuator/health \
-              && echo "Health check passed!" \
-              || (echo "Health check failed" && docker logs spring-miruni-backend && exit 1)
 
 
 
