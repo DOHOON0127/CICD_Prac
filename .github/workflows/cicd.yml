@@ -54,13 +54,8 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
 
-            # 1. 기존 컨테이너 종료 및 삭제
-            docker stop spring-miruni-backend || true
-            docker rm spring-miruni-backend || true
-
-            # 포트 점유 강제 해제 (중복 실행 방지)
-            sudo kill -9 $(sudo lsof -t -i:8080) || true
-            
+            # 기존 컨테이너 종료 및 삭제
+            docker rm -f spring-miruni-backend || true
 
             # 최신 이미지 다운로드
             docker pull ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
@@ -78,6 +73,7 @@ jobs:
               -v ~/application.yml:/app/application.yml \
               ${{ secrets.DOCKER_USERNAME }}/spring-miruni-backend:latest
 
+              
 
 
 
