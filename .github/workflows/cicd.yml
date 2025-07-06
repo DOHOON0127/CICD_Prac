@@ -72,4 +72,5 @@ jobs:
               -p 8080:8080 \
               -v ~/application.yml:/app/application.yml \
               ${{ secrets.DOCKER_USERNAME }}/spring-backend:latest
+
               
